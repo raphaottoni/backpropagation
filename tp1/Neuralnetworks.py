@@ -24,6 +24,10 @@ class Neuralnetworks:
     print ("sigmoid: " + str((1.0 / (1.0 + math.exp(-activation)))))
     return 1.0 / (1.0 + math.exp(-activation))
 
+  # sigmoid derivate
+  def sigmoid_derivate(sigmoid):
+    return sigmoid* ( 1.0 - sigmoid)
+
   # Forward propagation function
   def forward_propagation(self,row):
     inputs = row
@@ -39,4 +43,34 @@ class Neuralnetworks:
         print(new_inputs)
       inputs = new_inputs
     return inputs
+
+
+  # Loss function implemented as cross entropy
+  def loss_function(self,output,index_correct_class):
+    loss = 0.0
+    for i in range(len(output)):
+      # verify if the current i is the correct class and set y_k accordingly
+      if i == index_correct_class:
+        y_k = 1
+      else:
+        y_k = 0
+      # add the cross entropy of this class
+      loss +=  - y_k * math.log10(output[i]) - (1 - y_k) * math.log10(1- output[i])
+    return loss
+
+  # auxiliar function to break a vector into num sub-vectors of same size
+  # size 10 => num  500
+  # size 50 => num  100
+  def chunk_it(self,data,num):
+    avg = len(data) / float(num)
+    sub_vetors = []
+    last = 0.0
+    while last < len(data):
+      sub_vetors.append(data[int(last):int(last + avg)])
+      last += avg
+    return sub_vetors
+
+  # Back propagation algorithm regarding the GD style: full generation, stochastic and mini-batch
+  #def backpropagation(self,batch_size, data):
+    #dasda
 
