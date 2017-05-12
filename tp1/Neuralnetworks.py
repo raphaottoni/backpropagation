@@ -3,12 +3,12 @@ from random import random
 import math
 
 class Neuralnetworks:
-  def __init__(self, n_inputs, n_hidden):
-    print("Creating the neural network with " + str(n_inputs) + " neurons in the hidden layer")
+  def __init__(self, n_inputs, n_hidden, n_outputs):
+    print("Creating the neural network with " + str(n_hidden) + " neurons in the hidden layer and " + str(n_outputs) + " outputs")
     self.network = list()
     hidden_layer = [{'weights':[random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
     self.network.append(hidden_layer)
-    output_layer = [{'weights':[random() for i in range(n_hidden + 1)]}]
+    output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs) ]
     self.network.append(output_layer)
 
 
