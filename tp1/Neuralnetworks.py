@@ -8,7 +8,7 @@ class Neuralnetworks:
     self.network = list()
     hidden_layer = [{'weights':[random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
     self.network.append(hidden_layer)
-    output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs) ]
+    output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]
     self.network.append(output_layer)
 
 
@@ -25,7 +25,7 @@ class Neuralnetworks:
     return 1.0 / (1.0 + math.exp(-activation))
 
   # sigmoid derivate
-  def sigmoid_derivate(sigmoid):
+  def sigmoid_derivate(self,sigmoid):
     return sigmoid* ( 1.0 - sigmoid)
 
   # Forward propagation function
@@ -38,8 +38,18 @@ class Neuralnetworks:
       for neuron in layer:
         print("Novo Neuoronio")
         activation = self.neuron_activation(neuron["weights"],inputs)
-        neuron["output"] = self.activation_funcion(activation)
-        new_inputs.append(neuron['output'])
+
+        # The output key will hold all values that the neuron activation function resulted until the
+        # back propagation process. It should be cleaned after each back propagation
+        if "output" in  neuron:
+          neuron["output"].append(self.activation_funcion(activation))
+        else:
+          neuron["output"] = [self.activation_funcion(activation)]
+
+        #neuron["output"] = self.activation_funcion(activation)
+        #new_inputs.append(neuron['output'])
+
+        new_inputs.append(neuron['output'][-1])
         print(new_inputs)
       inputs = new_inputs
     return inputs
@@ -71,6 +81,49 @@ class Neuralnetworks:
     return sub_vetors
 
   # Back propagation algorithm regarding the GD style: full generation, stochastic and mini-batch
-  #def backpropagation(self,batch_size, data):
-    #dasda
+  def back_propagate_error(self,batch_sized_data, batch_sized_classes):
+
+    #calculate the accumulated loss function result for each one of the entries from the batch_sized_data
+    # and store the neurons output of each one inside the network
+    loss = 0.0
+
+    for i in range(len(batch_sized_data)):
+      loss += self.loss_function(self.forward_propagation(batch_sized_data[i]),batch_sized_classes[i])
+
+    # The GD  loss should be calculated as the mean of the losses
+    loss = loss / len(batch_sized_data)
+
+    # Now that we have the loss, we should update the neuron's weights
+    # In order to do that, we should iterate from the deepest layer to the shallowest
+    for i in  reversed(range(len(self.network))):
+      layer = self.network[i]
+      errors = list()
+      # check if it's the deepest layer, because if it is, the error is calculated with out
+      # the gradient
+      if i != len(self.network)-1:
+        for j in range(len(layer)):
+          error = 0.0
+          for neuron in self.network[i + 1]:
+
+            # Here we will use the error as the mean of the batch
+            for m in range(len(neuron['delta'])):
+              error += (neuron['weights'][j] * neuron['delta'][m])
+            error = error / len(batch_sized_data)
+            #error += (neuron['weights'][j] * neuron['delta'])
+            errors.append(error)
+      else:
+        for j in range(len(layer)):
+          neuron = layer[j]
+          # The error of the deepest layer is the loss calculated before
+          errors.append(loss)
+
+      for j in range(len(layer)):
+        neuron = layer[j]
+        neuron['delta'] = []
+        for k in range(len(batch_sized_data)):
+          neuron['delta'].append(errors[j] * self.sigmoid_derivate(neuron['output'][k]))
+
+
+
+
 
