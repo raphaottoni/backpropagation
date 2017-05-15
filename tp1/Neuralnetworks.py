@@ -3,9 +3,16 @@ from random import random
 import math
 
 class Neuralnetworks:
+
+  # define seed
+  seed(1)
+
   def __init__(self, n_inputs, n_hidden, n_outputs):
     print("Creating the neural network with " + str(n_hidden) + " neurons in the hidden layer and " + str(n_outputs) + " outputs")
     self.network = list()
+    self.n_inputs = n_inputs
+    self.n_hidden = n_hidden
+    self.n_outputs= n_outputs
     hidden_layer = [{'weights':[random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
     self.network.append(hidden_layer)
     output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]
@@ -21,8 +28,7 @@ class Neuralnetworks:
 
   # Activation function implemented as sigmoid
   def activation_funcion(self,activation):
-    print ("sigmoid: " + str((1.0 / (1.0 + math.exp(-activation)))))
-    return 1.0 / (1.0 + math.exp(-activation))
+    return  1.0 / (1.0 + math.exp(-activation))
 
   # sigmoid derivate
   def sigmoid_derivate(self,sigmoid):
@@ -32,11 +38,11 @@ class Neuralnetworks:
   def forward_propagation(self,row):
     inputs = row
     for layer in self.network:
-      print("Novo layer")
+      #print("Novo layer")
       new_inputs = []
       inputs.append(1)
       for neuron in layer:
-        print("Novo Neuoronio")
+        #print("Novo Neuoronio")
         activation = self.neuron_activation(neuron["weights"],inputs)
 
         # The output key will hold all values that the neuron activation function resulted until the
@@ -50,7 +56,7 @@ class Neuralnetworks:
         #new_inputs.append(neuron['output'])
 
         new_inputs.append(neuron['output'][-1])
-        print(new_inputs)
+        #print(new_inputs)
       inputs = new_inputs
     return inputs
 
@@ -93,6 +99,9 @@ class Neuralnetworks:
     # The GD  loss should be calculated as the mean of the losses
     loss = loss / len(batch_sized_data)
 
+    # Print the loss of this mini-batch
+    print("The loss of this iteration was: " + str(loss))
+
     # Now that we have the loss, we should update the neuron's weights
     # In order to do that, we should iterate from the deepest layer to the shallowest
     for i in  reversed(range(len(self.network))):
@@ -125,5 +134,49 @@ class Neuralnetworks:
 
 
 
+  # Update network weights with error
+  def update_weights(self,batch_sized_data,l_rate):
+    for i in range(len(self.network)):
 
+      # Finds the inputs of each layer
+      inputs = batch_sized_data
+      if i != 0:
+        inputs_temp = {k: [] for k in range(len(self.network[i-1][0]['output']))}
+        for neuron in self.network[i -1]:
+          for output in range(len(neuron['output'])):
+            inputs_temp[output].append(neuron['output'][output])
 
+        inputs = []
+        for v in range(len(inputs_temp)):
+          inputs_temp[v].append(1)
+          inputs.append(inputs_temp[v])
+
+      # for each neuron of this layer
+      for neuron in self.network[i]:
+        #partial = [0.0] * len(neuron['weights'])
+        #print(len(inputs))
+        for j in range(len(inputs)):
+          #print(len(inputs[j]))
+          for m in range(len(inputs[j])):
+            neuron["weights"][m] -= l_rate * neuron['delta'][j] * inputs[j][m] * 1/len(inputs)
+
+    # clean the outputs for the next back_propagation_error
+    for i in range(len(self.network)):
+      for neuron in self.network[i]:
+        neuron.pop('output', None)
+
+  # General function to train the network
+  def train(self,subvector_size,data,data_classes,l_rate,n_epoch):
+    #subdivide the data according to GD method
+    batch_sized_data = self.chunk_it(data,subvector_size)
+    batch_sized_classes = self.chunk_it(data_classes,subvector_size)
+    #for each epoch
+    for i in range(n_epoch):
+      #for each mini-batch
+      for j in range(len(batch_sized_data)):
+        self.back_propagate_error(batch_sized_data[j],batch_sized_classes[j])
+        # remove extra bias added after each epoch
+        for entry in range(len(batch_sized_data[j])):
+          if len(batch_sized_data[j][entry]) > (self.n_inputs + 1):
+            batch_sized_data[j][entry].pop()
+        self.update_weights(batch_sized_data[j],l_rate)
