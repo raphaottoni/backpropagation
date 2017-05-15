@@ -5,7 +5,7 @@ import math
 class Neuralnetworks:
 
   # define seed
-  seed(1)
+  seed(100)
 
   def __init__(self, n_inputs, n_hidden, n_outputs):
     print("Creating the neural network with " + str(n_hidden) + " neurons in the hidden layer and " + str(n_outputs) + " outputs")
@@ -106,31 +106,47 @@ class Neuralnetworks:
     # In order to do that, we should iterate from the deepest layer to the shallowest
     for i in  reversed(range(len(self.network))):
       layer = self.network[i]
-      errors = list()
+      #errors = list()
+      errors = {}
       # check if it's the deepest layer, because if it is, the error is calculated with out
       # the gradient
       if i != len(self.network)-1:
         for j in range(len(layer)):
-          error = 0.0
+          #error = 0.0
           for neuron in self.network[i + 1]:
-
             # Here we will use the error as the mean of the batch
+            errors[j]= []
             for m in range(len(neuron['delta'])):
-              error += (neuron['weights'][j] * neuron['delta'][m])
-            error = error / len(batch_sized_data)
+              #error += (neuron['weights'][j] * neuron['delta'][m])
+              errors[j].append(neuron['weights'][j] * neuron['delta'][m])
+
+            #error = error / len(batch_sized_data)
             #error += (neuron['weights'][j] * neuron['delta'])
-            errors.append(error)
+            #errors.append(error)
       else:
         for j in range(len(layer)):
           neuron = layer[j]
-          # The error of the deepest layer is the loss calculated before
-          errors.append(loss)
+          # The error of each neuron of the output layer is the diference from the expected class
+          partial = 0.0
+          errors[j] = []
+          for m in range(len(neuron['output'])):
+            #partial +=  neuron['output'][m] - batch_sized_classes[m]
+            #print(str(neuron['output'][m])  + " - " + str(batch_sized_classes[m]))
+            #partial +=   batch_sized_classes[m] - neuron['output'][m]
+            errors[j].append(batch_sized_classes[m] - neuron['output'][m])
+            #print(str(batch_sized_classes[m])  + " - " + str(neuron['output'][m]))
+          #errors.append(partial/len(batch_sized_classes))
+          #errors.append(partial)
+          #errors.append(neuron['output'][j] - batch_sized_classes[j] )
+          #errors.append(
 
+        #print("Errors")
+        #print(errors)
       for j in range(len(layer)):
         neuron = layer[j]
         neuron['delta'] = []
         for k in range(len(batch_sized_data)):
-          neuron['delta'].append(errors[j] * self.sigmoid_derivate(neuron['output'][k]))
+          neuron['delta'].append(errors[j][k] * self.sigmoid_derivate(neuron['output'][k]))
 
 
 
