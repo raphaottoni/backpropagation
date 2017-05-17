@@ -5,11 +5,11 @@ import math
 
 class Neuralnetworks:
 
-  # define seed
-  #seed()
+  #define seed
+  seed(901)
 
   def __init__(self, n_inputs, n_hidden, n_outputs):
-    print("Creating the neural network with " + str(n_hidden) + " neurons in the hidden layer and " + str(n_outputs) + " outputs")
+    #print("Creating the neural network with " + str(n_hidden) + " neurons in the hidden layer and " + str(n_outputs) + " outputs")
     self.network = list()
     self.n_inputs = n_inputs
     self.n_hidden = n_hidden
@@ -122,6 +122,7 @@ class Neuralnetworks:
           for m in range(len(layer[j]['output'])):
             erro= 0.0
             for neuron in self.network[i+1]:
+              #print("Colocando erro["+ str(j)+ "]: " + str( neuron['weights'][j]) + " * "+ str(neuron['delta'][m]) + " = " + str(neuron['weights'][j] * neuron['delta'][m]))
               erro += neuron['weights'][j] * neuron['delta'][m]
             errors[j].append(erro)
 
@@ -143,8 +144,8 @@ class Neuralnetworks:
             #error = error / len(batch_sized_data)
             #error += (neuron['weights'][j] * neuron['delta'])
             #errors.append(error)
-        print("Errors primeira camada")
-        print(errors)
+        #print("Errors primeira camada")
+        #print(errors)
       else:
         for j in range(len(layer)):
           neuron = layer[j]
@@ -155,23 +156,28 @@ class Neuralnetworks:
             #partial +=  neuron['output'][m] - batch_sized_classes[m]
             #erro +=   batch_sized_classes[m] - neuron['output'][m]
             #errors[j].append(batch_sized_classes[m] - neuron['output'][m])
-            errors[j].append(batch_sized_classes[m] - neuron['output'][m])
+            if j == batch_sized_classes[m]:
+              target = 1.0
+            else:
+              target = 0.0
+            #print("O Target :  " + str(target))
+            errors[j].append(target - neuron['output'][m])
             #errors[j].append(neuron['output'][m] - batch_sized_classes[m])
             #print(str(neuron['output'][m])  + " - " + str(batch_sized_classes[m]))
             #print(str(batch_sized_classes[m])  + " - " + str(neuron['output'][m]))
           #errors.append(erro)
-        print("Errors ultima camada")
-        print(errors)
+        #print("Errors ultima camada")
+        #print(errors)
       for j in range(len(layer)):
         neuron = layer[j]
         neuron['delta'] = []
-        print(neuron)
+        #print(neuron)
         for k in range(len(batch_sized_data)):
-          print(self.sigmoid_derivate(neuron['output'][k]))
-          print(neuron['output'][k])
+          #print(self.sigmoid_derivate(neuron['output'][k]))
+          #print(neuron['output'][k])
           neuron['delta'].append(errors[j][k] * self.sigmoid_derivate(neuron['output'][k]))
-          print("Delta: " + str(errors[j][k]) + " * "  +str( self.sigmoid_derivate(neuron['output'][k])))
-          print(neuron)
+          #print("Delta: " + str(errors[j][k]) + " * "  +str( self.sigmoid_derivate(neuron['output'][k])))
+          #print(neuron)
 
     return loss
 
@@ -194,6 +200,7 @@ class Neuralnetworks:
           inputs.append(inputs_temp[v])
 
       #print("----> " + str(inputs))
+      #print(len(inputs))
       #for each neuron of this layer
       for neuron in self.network[i]:
         partial = [0.0] * len(neuron['weights'])
@@ -204,13 +211,14 @@ class Neuralnetworks:
           for m in range(len(inputs[j])):
               #print("adicionando: "  + str(neuron['delta'][j]) + " * " + str(inputs[j][m]) +  " em Partial["+str(m)+"]")
               #neuron["weights"][m] -= neuron['delta'][j] * inputs[j][m]
-              partial[m] += neuron['delta'][j] * inputs[j][m]
-              #neuron["weights"][m] -= l_rate * neuron['delta'][j] * inputs[j][m] * 1/len(inputs)
+              #partial[m] += neuron['delta'][j] * inputs[j][m] * l_rate * 1.0/len(inputs)
+              neuron["weights"][m] += l_rate * neuron['delta'][j] * inputs[j][m]
         #print("calculo: " + str(l_rate) + " * " + str(neuron['delta'][j]) + " * " + str(inputs[j][m]) + " * " + str(1/len(inputs)))
-        for v in range(len(neuron["weights"])):
-          #print("atualizando ["+str(v)+"]: " + str(neuron["weights"][v]) + " - (" + str(partial[v]) +" * "+  str(l_rate) + " * " +str(1.0/len(inputs)))
-          neuron["weights"][v] = neuron["weights"][v]  - (partial[v] * l_rate * 1.0/len(inputs))
-          #print("= " +str( neuron["weights"][v] ))
+        #for v in range(len(neuron["weights"])):
+        #  #print("atualizando ["+str(v)+"]: " + str(neuron["weights"][v]) + " + (" + str(partial[v]) +" * "+  str(l_rate) + " * " +str(1.0/len(inputs)))
+        #  #neuron["weights"][v] = neuron["weights"][v]  + (partial[v] * l_rate * 1.0/len(inputs))
+        #  neuron["weights"][v] = neuron["weights"][v]  + partial[v]
+        #  #print("= " +str( neuron["weights"][v] ))
 
 
     # clean the outputs for the next back_propagation_error
@@ -237,15 +245,16 @@ class Neuralnetworks:
         #print("retornei :" +str(loss))
         # remove extra bias added after each epoch
         for entry in range(len(batch_sized_data[j])):
+          #print(self.network)
           if len(batch_sized_data[j][entry]) > (self.n_inputs + 1):
             batch_sized_data[j][entry].pop()
-        print(self.network)
+        #print(self.network)
         self.update_weights(batch_sized_data[j],l_rate)
-        print(self.network)
+        #print(self.network)
 
       # shuffle the data
-      #c = list(zip(data,data_classes))
-      #random.shuffle(c)
-      #data,data_classes = zip(*c)
+      c = list(zip(data,data_classes))
+      random.shuffle(c)
+      data,data_classes = zip(*c)
       #random.shuffle(data)
-      print("************************ Erro foi de: " + str(loss/len(data)))
+      print(" {**************************************************}"+str(i+1) + ", " + str(loss/len(data)))
