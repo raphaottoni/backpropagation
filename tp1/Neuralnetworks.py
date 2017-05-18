@@ -5,19 +5,15 @@ import math
 
 class Neuralnetworks:
 
-  #define seed
   seed(901)
-
   def __init__(self, n_inputs, n_hidden, n_outputs):
-    #print("Creating the neural network with " + str(n_hidden) + " neurons in the hidden layer and " + str(n_outputs) + " outputs")
+    print("Creating the neural network with " + str(n_hidden) + " neurons in the hidden layer and " + str(n_outputs) + " outputs")
     self.network = list()
     self.n_inputs = n_inputs
     self.n_hidden = n_hidden
     self.n_outputs= n_outputs
     hidden_layer = [{'weights':[random.random()/math.sqrt(n_hidden) for i in range(n_inputs + 1)]} for i in range(n_hidden)]
-    #hidden_layer = [{'weights':[random.random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
     self.network.append(hidden_layer)
-    #output_layer = [{'weights':[random.random()  for i in range(n_hidden + 1)]} for i in range(n_outputs)]
     output_layer = [{'weights':[random.random()/math.sqrt(n_hidden) for i in range(n_hidden + 1)]} for i in range(n_outputs)]
     self.network.append(output_layer)
 
@@ -162,6 +158,7 @@ class Neuralnetworks:
               target = 0.0
             #print("O Target :  " + str(target))
             errors[j].append(target - neuron['output'][m])
+            #errors[j].append(neuron['output'][m]-target)
             #errors[j].append(neuron['output'][m] - batch_sized_classes[m])
             #print(str(neuron['output'][m])  + " - " + str(batch_sized_classes[m]))
             #print(str(batch_sized_classes[m])  + " - " + str(neuron['output'][m]))
@@ -211,14 +208,14 @@ class Neuralnetworks:
           for m in range(len(inputs[j])):
               #print("adicionando: "  + str(neuron['delta'][j]) + " * " + str(inputs[j][m]) +  " em Partial["+str(m)+"]")
               #neuron["weights"][m] -= neuron['delta'][j] * inputs[j][m]
-              #partial[m] += neuron['delta'][j] * inputs[j][m] * l_rate * 1.0/len(inputs)
-              neuron["weights"][m] += l_rate * neuron['delta'][j] * inputs[j][m]
+              #partial[m] += neuron['delta'][j] * inputs[j][m] #* l_rate * 1.0/len(inputs)
+              neuron["weights"][m] += neuron['delta'][j] * inputs[j][m] * l_rate * 1.0/len(inputs)
         #print("calculo: " + str(l_rate) + " * " + str(neuron['delta'][j]) + " * " + str(inputs[j][m]) + " * " + str(1/len(inputs)))
         #for v in range(len(neuron["weights"])):
-        #  #print("atualizando ["+str(v)+"]: " + str(neuron["weights"][v]) + " + (" + str(partial[v]) +" * "+  str(l_rate) + " * " +str(1.0/len(inputs)))
-        #  #neuron["weights"][v] = neuron["weights"][v]  + (partial[v] * l_rate * 1.0/len(inputs))
-        #  neuron["weights"][v] = neuron["weights"][v]  + partial[v]
-        #  #print("= " +str( neuron["weights"][v] ))
+          #print("atualizando ["+str(v)+"]: " + str(neuron["weights"][v]) + " + (" + str(partial[v]) +" * "+  str(l_rate) + " * " +str(1.0/len(inputs)))
+          #neuron["weights"][v] = neuron["weights"][v]  + (partial[v] * l_rate * 1.0/len(inputs))
+          #neuron["weights"][v] = neuron["weights"][v]  + partial[v]
+          #print("= " +str( neuron["weights"][v] ))
 
 
     # clean the outputs for the next back_propagation_error
@@ -257,4 +254,4 @@ class Neuralnetworks:
       random.shuffle(c)
       data,data_classes = zip(*c)
       #random.shuffle(data)
-      print(" {**************************************************}"+str(i+1) + ", " + str(loss/len(data)))
+      print(str(i+1) + ", " + str(loss/len(data)))

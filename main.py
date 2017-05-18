@@ -14,7 +14,7 @@ with open('data/data_tp1_random') as csvfile:
     digit_data.append(row_numeric[1:])
 
 a = Neuralnetworks(784,25,10)
-a.train(512,digit_data,classes,1,8)
+a.train(1,digit_data,classes,1,20)
 
 #a = Neuralnetworks(2,1,2)
 #a.train(4,[[1,1],[2,2],[3,3],[4,4]],[1,1,1,1],1,8)
